@@ -53,7 +53,7 @@
 
     text = text
     // Remove line breaks
-    .replace(/(?:\n|\r\n|\r)/ig, " ")
+    .replace(/(\r?\n)/ig, " ")
     // Remove content in script tags.
     .replace(/<\s*script[^>]*>[\s\S]*?<\/script>/mig, "")
     // Remove content in style tags.
@@ -62,49 +62,14 @@
     .replace(/<!--.*?-->/mig, "")
     // Remove !DOCTYPE
     .replace(/<!DOCTYPE.*?>/ig, "");
-
-    /* I scanned http://en.wikipedia.org/wiki/HTML_element for all html tags.
-    I put those tags that should affect plain text formatting in two categories:
-    those that should be replaced with two newlines and those that should be
-    replaced with one newline. */
-    var doubleNewlineTags = ['p', 'h[1-6]', 'dl', 'dt', 'dd', 'ol', 'ul', 'dir', 'address', 'blockquote', 'center', 'div', 'hr', 'pre', 'form', 'textarea', 'table'];
-
-    var singleNewlineTags = ['li', 'del', 'ins', 'fieldset', 'legend','tr', 'th', 'caption', 'thead', 'tbody', 'tfoot'];
-
-    for (var i = 0; i < doubleNewlineTags.length; i++) {
-      var r = RegExp('</?\\s*' + doubleNewlineTags[i] + '[^>]*>', 'ig');
-      text = text.replace(r, ' ');
-    }
-
-    for (var i = 0; i < singleNewlineTags.length; i++) {
-      var r = RegExp('<\\s*' + singleNewlineTags[i] + '[^>]*>', 'ig');
-      text = text.replace(r, ' ');
-    }
-
-    // Replace <br> and <br/> with a single newline
-    text = text.replace(/<\s*br[^>]*\/?\s*>/ig, ' ');
-
-    text = text
-    // Remove all remaining tags.
-    .replace(/(<([^>]+)>)/ig, "")
-    // Trim rightmost whitespaces for all lines
-    .replace(/([^\n\S]+)\n/g, " ")
-    .replace(/([^\n\S]+)$/, "")
-    // Make sure there are never more than two
-    // consecutive linebreaks.
-    .replace(/\n{2,}/g, " ")
-    // Remove newlines at the beginning of the text.
-    .replace(/^\n+/, "")
-    // Remove newlines at the end of the text.
-    .replace(/\n+$/, "")
+    // Remove all tags.
+    .replace(/(<([^>]+)>)/ig, ' ')
+    // Remove newlines
+    .replace(/\n/g, " ")
     // Remove HTML entities.
-    .replace(/&([^;]+);/g, ' ')
-    //remove all tabs and replace them with whitespace
-    .replace(/\t/g, " ")
-    //remove whitespace > 2
-    .replace(/ {2,}/g, " ");
+    .replace(/&([^;]+);/g, ' ');
 
-    this._str = text;
+    this._str = text.trim();
   }
 
   /**
@@ -139,7 +104,7 @@
     //remove all stop words
     _removeStopWords.call(this);
     //split the text with space
-    var words = this._str.split(" ");
+    var words = this._str.split(/\s+/);
     var density = [];
 
     //sort the array
